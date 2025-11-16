@@ -1,0 +1,5 @@
+{
+  "name": "Review Analyzer & Responder",
+  "description": "An intelligent application that analyzes guest reviews for tourist rentals and automatically generates professional, optimistic responses. Powered by Gemini, it transforms criticism into opportunities for improvement, maintaining a positive brand image.",
+  "requestFramePermissions": []
+}
