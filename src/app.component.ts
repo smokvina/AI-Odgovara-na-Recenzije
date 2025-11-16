@@ -1,4 +1,3 @@
-
 import { Component, ChangeDetectionStrategy, signal, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { GeminiService } from './services/gemini.service';
@@ -18,13 +17,16 @@ interface AnalysisPair {
 export class AppComponent {
   private geminiService = inject(GeminiService);
 
-  reviewsInput = signal<string>(`Lokacija je bila odlična, u samom centru grada. Međutim, apartman je bio malo bučan noću zbog prometa. Sve u svemu, solidan boravak.
+  reviewsInput = signal<string>(`The location was excellent, right in the city center. However, the apartment was a bit noisy at night due to traffic. All in all, a solid stay.
 
-Apartman je bio besprijekorno čist i moderno uređen. Domaćin je bio vrlo ljubazan i dao nam je odlične preporuke za restorane. Jedina zamjerka je što je Wi-Fi bio spor s vremena na vrijeme. Vratit ćemo se sigurno!`);
+The apartment was spotlessly clean and modernly furnished. The host was very friendly and gave us great recommendations for restaurants. The only complaint is that the Wi-Fi was slow from time to time. We will definitely be back!`);
   analysisResult = signal<string | null>(null);
   isLoading = signal<boolean>(false);
   error = signal<string | null>(null);
   copiedIndex = signal<number | null>(null);
+  selectedLanguage = signal<string>('English');
+
+  readonly availableLanguages = ['English', 'Spanish', 'French', 'German', 'Croatian'];
 
   parsedResults = computed<AnalysisPair[]>(() => {
     const result = this.analysisResult();
@@ -32,14 +34,14 @@ Apartman je bio besprijekorno čist i moderno uređen. Domaćin je bio vrlo ljub
 
     const pairs = result.split('---').filter(p => p.trim() !== '');
     return pairs.map(pair => {
-      const reviewMarker = 'Recenzija:';
-      const responseMarker = 'Odgovor:';
+      const reviewMarker = 'Review:';
+      const responseMarker = 'Response:';
       
       const reviewIndex = pair.indexOf(reviewMarker);
       const responseIndex = pair.indexOf(responseMarker);
 
       if (reviewIndex === -1 || responseIndex === -1) {
-        return { review: pair.trim(), response: 'Format odgovora nije prepoznat.' };
+        return { review: pair.trim(), response: 'Response format not recognized.' };
       }
 
       const review = pair.substring(reviewIndex + reviewMarker.length, responseIndex).trim();
@@ -52,7 +54,7 @@ Apartman je bio besprijekorno čist i moderno uređen. Domaćin je bio vrlo ljub
   async analyzeReviews() {
     const currentInput = this.reviewsInput().trim();
     if (!currentInput) {
-      this.error.set('Molimo unesite tekst recenzija za analizu.');
+      this.error.set('Please enter review text to analyze.');
       return;
     }
 
@@ -61,10 +63,10 @@ Apartman je bio besprijekorno čist i moderno uređen. Domaćin je bio vrlo ljub
     this.analysisResult.set(null);
 
     try {
-      const result = await this.geminiService.analyzeReviews(currentInput);
+      const result = await this.geminiService.analyzeReviews(currentInput, this.selectedLanguage());
       this.analysisResult.set(result);
     } catch (e: any) {
-      this.error.set(e.message || 'Došlo je do nepoznate pogreške.');
+      this.error.set(e.message || 'An unknown error occurred.');
     } finally {
       this.isLoading.set(false);
     }
@@ -73,6 +75,11 @@ Apartman je bio besprijekorno čist i moderno uređen. Domaćin je bio vrlo ljub
   onTextAreaInput(event: Event) {
     const target = event.target as HTMLTextAreaElement;
     this.reviewsInput.set(target.value);
+  }
+
+  onLanguageChange(event: Event) {
+    const target = event.target as HTMLSelectElement;
+    this.selectedLanguage.set(target.value);
   }
 
   copyResponse(text: string, index: number) {
@@ -85,7 +92,7 @@ Apartman je bio besprijekorno čist i moderno uređen. Domaćin je bio vrlo ljub
       }, 2000);
     }).catch(err => {
       console.error('Failed to copy text: ', err);
-      this.error.set('Kopiranje nije uspjelo. Provjerite dozvole u pregledniku.');
+      this.error.set('Could not copy text. Please check browser permissions.');
     });
   }
 }

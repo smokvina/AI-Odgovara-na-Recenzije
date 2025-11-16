@@ -1,4 +1,3 @@
-
 <main class="min-h-screen bg-slate-50 p-4 sm:p-6 md:p-8">
   <div class="max-w-4xl mx-auto">
     
@@ -7,26 +6,42 @@
       <div class="inline-flex items-center gap-3 mb-2">
         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-600"><path d="M12.5 22h-6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v6.5"/><path d="M12 2v20"/><path d="M18.4 14.6a2 2 0 1 0-2.7-2.7"/><path d="m21.5 17.5-1.4-1.4"/><path d="m17 22 4-4"/></svg>
         <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900">
-          Analizator Recenzija
+          Review Analyzer
         </h1>
       </div>
       <p class="text-slate-500 max-w-2xl mx-auto">
-        Unesite recenzije gostiju, a Gemini će izdvojiti ključne točke i automatski generirati profesionalne, optimistične odgovore.
+        Enter guest reviews, and Gemini will extract key points and automatically generate professional, optimistic responses.
       </p>
     </header>
 
     <!-- Input Section -->
     <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200 mb-8">
+      <div class="mb-4">
+        <label for="language-select" class="block text-sm font-medium text-slate-700 mb-2">
+          Select Response Language:
+        </label>
+        <select 
+          id="language-select"
+          [value]="selectedLanguage()"
+          (change)="onLanguageChange($event)"
+          class="w-full max-w-xs p-2 border border-slate-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out text-sm bg-white"
+        >
+          @for(lang of availableLanguages; track lang) {
+            <option [value]="lang">{{ lang }}</option>
+          }
+        </select>
+      </div>
+
       <label for="reviews-input" class="block text-sm font-medium text-slate-700 mb-2">
-        Zalijepite recenzije ovdje:
+        Paste reviews here:
       </label>
       <textarea 
         id="reviews-input"
         [value]="reviewsInput()"
         (input)="onTextAreaInput($event)"
         rows="10" 
-        class="w-full p-3 border border-slate-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out text-sm"
-        placeholder="Npr: Lokacija je bila odlična, ali je apartman bio bučan..."
+        class="w-full p-3 border border-slate-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out text-sm bg-white"
+        placeholder="E.g., The location was great, but the apartment was noisy..."
       ></textarea>
       <div class="mt-4 text-right">
         <button 
@@ -39,10 +54,10 @@
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            Analiziram...
+            Analyzing...
           } @else {
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="-ml-1 mr-2"><path d="M9.5 2.5a1.5 1.5 0 0 1 3 0V6a1.5 1.5 0 0 1-3 0V2.5Z"/><path d="M12.5 22h-6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v6.5"/><path d="M12 2v20"/><path d="M18.4 14.6a2 2 0 1 0-2.7-2.7"/><path d="m21.5 17.5-1.4-1.4"/><path d="m17 22 4-4"/></svg>
-            Analiziraj i odgovori
+            Analyze and Respond
           }
         </button>
       </div>
@@ -52,7 +67,7 @@
     <div class="space-y-6">
       @if (isLoading()) {
         <div class="text-center p-8 bg-white rounded-xl shadow-lg border border-slate-200">
-          <p class="text-slate-600">Gemini analizira recenzije i priprema odgovore. Molimo za trenutak...</p>
+          <p class="text-slate-600">Gemini is analyzing reviews and preparing responses. Please wait a moment...</p>
         </div>
       }
 
@@ -65,7 +80,7 @@
               </svg>
             </div>
             <div>
-              <p class="font-bold">Greška</p>
+              <p class="font-bold">Error</p>
               <p class="text-sm">{{ error() }}</p>
             </div>
           </div>
@@ -73,19 +88,19 @@
       }
 
       @if (parsedResults().length > 0) {
-        <h2 class="text-2xl font-bold text-slate-800 border-b pb-2">Generirani odgovori</h2>
+        <h2 class="text-2xl font-bold text-slate-800 border-b pb-2">Generated Responses</h2>
         <div class="space-y-6">
           @for (item of parsedResults(); track $index) {
             <div class="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden transition-all hover:shadow-xl">
               <div class="p-5">
-                <h3 class="font-semibold text-lg text-slate-800 mb-3">Originalna recenzija</h3>
+                <h3 class="font-semibold text-lg text-slate-800 mb-3">Original Review</h3>
                 <blockquote class="border-l-4 border-slate-200 pl-4 italic text-slate-600">
                   {{ item.review }}
                 </blockquote>
               </div>
               <div class="bg-indigo-50 p-5 border-t border-indigo-200">
                  <div class="flex justify-between items-start mb-3">
-                    <h3 class="font-semibold text-lg text-indigo-900">Prijedlog odgovora</h3>
+                    <h3 class="font-semibold text-lg text-indigo-900">Suggested Response</h3>
                     <button 
                       (click)="copyResponse(item.response, $index)"
                       class="inline-flex items-center justify-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm transition-colors duration-200"
@@ -93,10 +108,10 @@
                     >
                       @if (copiedIndex() === $index) {
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="-ml-0.5 mr-1.5"><path d="M20 6 9 17l-5-5"/></svg>
-                        Kopirano!
+                        Copied!
                       } @else {
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="-ml-0.5 mr-1.5"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
-                        Kopiraj
+                        Copy
                       }
                     </button>
                  </div>

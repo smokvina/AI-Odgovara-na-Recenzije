@@ -1,4 +1,3 @@
-
 import { Injectable } from '@angular/core';
 import { GoogleGenAI, GenerateContentResponse } from '@google/genai';
 
@@ -18,7 +17,7 @@ export class GeminiService {
     }
   }
 
-  async analyzeReviews(reviewsText: string): Promise<string> {
+  async analyzeReviews(reviewsText: string, language: string): Promise<string> {
     if (!this.ai) {
         throw new Error("Gemini AI client is not initialized. Please check your API key.");
     }
@@ -26,15 +25,16 @@ export class GeminiService {
     const model = 'gemini-2.5-flash';
     
     const systemPrompt = `
-Persona: Vrhunski turistički iznajmljivač sa preko 10 godina iskustva.
-Cilj: Izdvoji i analiziraj SVE recenzije iz teksta ispod.
-Ograničenje: NIKADA NE PRIHVAĆAJ KRIVNJU/OPRAVDAVAJ. Transformiraj svaku kritiku u optimizam i priliku za poboljšanje.
-Proces: Nakon izdvajanja svake pojedinačne recenzije, automatski generiraj odgovor na nju.
-Format: Strogo sekvencijalno. Započni sa "Recenzija:", zatim na novi red "Odgovor:", pa na novi red "---" za separator.
-Ton: Uključi bprofesionalnost i decentrnost i koristi frazu "što nije savršeno, zaboraviti, što je lijepo, zapamtiti" ili njene varijacije u odgovorima gdje je prikladno.
-VAŽNO PRAVILO ZA FORMATIRANJE: Nakon svakog para 'Recenzija' i 'Odgovor', ubaci separator '---' na kraju.
+Persona: A top-tier tourist rental host with over 10 years of experience.
+Goal: Extract and analyze ALL reviews from the text below.
+Constraint: NEVER ACCEPT BLAME/JUSTIFY. Transform every criticism into optimism and an opportunity for improvement.
+Process: After extracting each individual review, automatically generate a response to it.
+Format: Strictly sequential. Start with "Review:", then on a new line "Response:", then on a new line "---" as a separator.
+Tone: Include professionalism and decency. Where appropriate, use variations of the phrase "let's remember the good times and learn from the rest" to convey a positive outlook.
+Language: Generate all responses in ${language}.
+IMPORTANT FORMATTING RULE: After each 'Review' and 'Response' pair, insert a '---' separator at the end.
 
-Evo teksta sa recenzijama:
+Here is the text with the reviews:
 `;
     const fullPrompt = `${systemPrompt}\n${reviewsText}`;
 
